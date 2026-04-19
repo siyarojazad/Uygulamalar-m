@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Uygulamalarım"/>
+<meta name="theme-color" content="#07070f"/>
+<title>Uygulamalarım</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#07070f;color:#e8e4d9;font-family:'DM Mono','Fira Mono','Courier New',monospace;overscroll-behavior:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:#222230;border-radius:2px}
+
+/* ── Hub ── */
+#hub{min-height:100vh;padding:calc(56px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto}
+.hub-header{margin-bottom:32px}
+.hub-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;background:linear-gradient(135deg,#b4a0ff,#60b4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hub-sub{font-size:11px;color:#333;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+.apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.app-card{background:#11111b;border:1px solid #1a1a2a;border-radius:20px;padding:20px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.app-card:active{transform:scale(.97)}
+.app-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--ac1),var(--ac2));opacity:0;transition:opacity .2s}
+.app-card:active::before{opacity:.06}
+.app-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;background:linear-gradient(135deg,var(--ac1),var(--ac2))}
+.app-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#d8d4c9;margin-bottom:4px}
+.app-desc{font-size:10px;color:#444;line-height:1.4}
+.app-badge{position:absolute;top:12px;right:12px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(180,160,255,.12);color:#b4a0ff;letter-spacing:.5px}
+
+.add-card{background:transparent;border:1px dashed #1a1a2a;border-radius:20px;padding:20px 16px;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;gap:8px}
+.add-icon{width:40px;height:40px;border-radius:12px;background:#111120;border:1px solid #1a1a2a;display:flex;align-items:center;justify-content:center;font-size:18px;color:#333}
+.add-text{font-size:10px;color:#2a2a3a;text-align:center;letter-spacing:.5px}
+
+/* ── App shell ── */
+#app-shell{display:none;position:fixed;inset:0;background:#07070f;z-index:200;flex-direction:column;overflow:hidden}
+#app-shell.open{display:flex}
+.shell-bar{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 12px;background:#07070f;border-bottom:1px solid #111120;flex-shrink:0}
+.back-btn{width:32px;height:32px;border-radius:10px;background:#111120;border:1px solid #1a1a2a;color:#888;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.shell-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#c8c4b9;flex:1}
+.shell-icon{width:28px;height:28px;border-radius:8px;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#app-content{flex:1;overflow-y:auto;overflow-x:hidden}
+
+/* ── Finans App ── */
+.fin-wrap{min-height:100%;padding:22px 14px 100px;max-width:480px;margin:0 auto}
+.card{background:#12121c;border:1px solid #1c1c2a;border-radius:16px}
+.btn{border:none;cursor:pointer;font-family:inherit;transition:all .18s}
+
+.tx-item{transition:background .18s;animation:sIn .26s ease}
+.tx-item:active{background:#181828}
+.del-btn{opacity:0;transition:opacity .18s}
+.tx-item:hover .del-btn{opacity:1}
+@keyframes sIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:flex-end;justify-content:center;z-index:300;animation:fIn .18s}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+.sheet{background:#12121c;border:1px solid #1c1c2a;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:22px 18px calc(40px + env(safe-area-inset-bottom));animation:sUp .26s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto}
+@keyframes sUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+input{background:#0b0b15;border:1px solid #1c1c2a;border-radius:10px;color:#e8e4d9;font-family:inherit;font-size:16px;padding:11px 13px;width:100%;outline:none;transition:border-color .18s;-webkit-appearance:none;appearance:none}
+input:focus{border-color:#b4a0ff}
+input::placeholder{color:#2e2e3e}
+input[type=date]{color-scheme:dark}
+
+.fab{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:56px;height:56px;background:linear-gradient(135deg,#b4a0ff,#7c6fff);border-radius:50%;font-size:24px;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(124,111,255,.5);border:none;z-index:250;cursor:pointer;transition:transform .18s}
+.fab:active{transform:translateX(-50%) scale(.9)}
+
+.seg{flex:1;padding:10px 4px;border-radius:10px;border:1px solid #1c1c2a;background:transparent;color:#555;font-family:inherit;font-size:12px;cursor:pointer;transition:all .18s;text-align:center}
+.kind-btn{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1c1c2a;background:transparent;color:#666;font-family:inherit;font-size:12px;cursor:pointer;transition:all .18s;text-align:left;margin-bottom:5px;display:block}
+.pm-btn{flex:1;padding:9px 4px;border-radius:10px;border:1px solid #1c1c2a;background:transparent;color:#555;font-family:inherit;font-size:12px;cursor:pointer;transition:all .18s;text-align:center}
+.cat-chip{padding:6px 12px;border-radius:20px;border:1px solid #1c1c2a;background:transparent;color:#666;font-family:inherit;font-size:11px;cursor:pointer;transition:all .18s}
+.cat-chip.sel{background:rgba(180,160,255,.13);color:#b4a0ff;border-color:rgba(180,160,255,.35)}
+.lbl{font-size:10px;color:#444;letter-spacing:1.2px;text-transform:uppercase;display:block;margin-bottom:7px}
+.sec{margin-bottom:14px}
+.tag{font-size:9px;padding:2px 7px;border-radius:4px;letter-spacing:.4px;font-weight:500;white-space:nowrap}
+.fbar{display:flex;gap:6px;margin-bottom:14px}
+.flt{flex:1;padding:7px 4px;border-radius:10px;border:1px solid #1c1c2a;background:transparent;color:#3a3a4a;font-family:inherit;font-size:11px;cursor:pointer;transition:all .18s;text-align:center}
+.flt.a-all{background:rgba(180,160,255,.1);color:#b4a0ff;border-color:rgba(180,160,255,.3)}
+.flt.a-in{background:rgba(74,222,154,.1);color:#4ade9a;border-color:rgba(74,222,154,.3)}
+.flt.a-out{background:rgba(244,113,90,.1);color:#f4715a;border-color:rgba(244,113,90,.3)}
+.flt.a-debt{background:rgba(240,165,0,.1);color:#f0a500;border-color:rgba(240,165,0,.3)}
+.bar-fill{transition:width .9s cubic-bezier(.34,1.56,.64,1)}
+.empty-state{text-align:center;padding:60px 20px;color:#1e1e2e}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HUB — Ana Ekran
+══════════════════════════════════════ -->
+<div id="hub">
+  <div class="hub-header">
+    <div class="hub-title">Uygulamalarım</div>
+    <div class="hub-sub">Kişisel araçlar</div>
+  </div>
+
+  <div class="apps-grid">
+    <!-- Finans Takip -->
+    <div class="app-card" style="--ac1:#4ade9a;--ac2:#7c6fff" onclick="openApp('finans')">
+      <div class="app-badge">Aktif</div>
+      <div class="app-icon">💰</div>
+      <div class="app-name">Finans Takip</div>
+      <div class="app-desc">Gelir, gider ve borç takibi</div>
+    </div>
+
+    <!-- Yakında 1 -->
+    <div class="add-card">
+      <div class="add-icon">+</div>
+      <div class="add-text">Yakında yeni uygulama</div>
+    </div>
+
+    <!-- Yakında 2 -->
+    <div class="add-card">
+      <div class="add-icon">+</div>
+      <div class="add-text">Yakında yeni uygulama</div>
+    </div>
+
+    <!-- Yakında 3 -->
+    <div class="add-card">
+      <div class="add-icon">+</div>
+      <div class="add-text">Yakında yeni uygulama</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP SHELL — Uygulama Kabı
+══════════════════════════════════════ -->
+<div id="app-shell">
+  <div class="shell-bar">
+    <button class="back-btn" onclick="closeApp()">←</button>
+    <div class="shell-title" id="shell-title">Uygulama</div>
+    <div class="shell-icon" id="shell-icon" style="background:linear-gradient(135deg,#4ade9a,#7c6fff)">💰</div>
+  </div>
+  <div id="app-content"></div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// APP ROUTER
+// ══════════════════════════════════
+const APPS = {
+  finans: { title: 'Finans Takip', icon: '💰', gradient: 'linear-gradient(135deg,#4ade9a,#7c6fff)', render: renderFinans }
+};
+
+function openApp(id) {
+  const app = APPS[id];
+  if (!app) return;
+  document.getElementById('shell-title').textContent = app.title;
+  document.getElementById('shell-icon').textContent = app.icon;
+  document.getElementById('shell-icon').style.background = app.gradient;
+  document.getElementById('app-content').innerHTML = '';
+  app.render(document.getElementById('app-content'));
+  document.getElementById('app-shell').classList.add('open');
+  document.getElementById('hub').style.display = 'none';
+}
+
+function closeApp() {
+  document.getElementById('app-shell').classList.remove('open');
+  document.getElementById('hub').style.display = '';
+  document.getElementById('app-content').innerHTML = '';
+  // FAB varsa kaldır
+  const fab = document.getElementById('global-fab');
+  if (fab) fab.remove();
+}
+
+// ══════════════════════════════════
+// FİNANS UYGULAMASI
+// ══════════════════════════════════
+
+const EXPENSE_CATS = [
+  { group: 'Sabit Giderler', items: ['Kira','Elektrik Faturası','Su Faturası','İnternet Faturası','TV / Streaming','Telefon Faturası','Tren Abonmanı','Sigorta'] },
+  { group: 'Yaşam Giderleri', items: ['Market','Öğlen Yemeği (İş)','Restoran / Dışarıda Yeme','Kişisel Bakım'] },
+  { group: 'Giyim ve Yaşam', items: ['Kıyafet','Ayakkabı ve Aksesuar','Ev Eşyası'] },
+  { group: 'Sağlık ve Eğitim', items: ['Sağlık / Eczane','Spor / Fitness','Eğitim / Kurs'] },
+  { group: 'Eğlence ve Diğer', items: ['Eğlence','Seyahat','Hediye / Bağış','Diğer'] },
+];
+const INCOME_CATS = [
+  { group: 'Düzenli Gelir', items: ['Maaş','Serbest Meslek'] },
+  { group: 'Ek Gelir', items: ['Ekstra İş','Freelance','Yatırım Geliri','Kira Geliri'] },
+  { group: 'Diğer', items: ['Hediye','Diğer'] },
+];
+const KIND_DEFS = {
+  expense:         { label:'Harcama',           icon:'↓', color:'#f4715a', bg:'rgba(244,113,90,.12)',  side:'out' },
+  debt_given:      { label:'Verilen Borç',       icon:'⇣', color:'#f0a500', bg:'rgba(240,165,0,.12)',   side:'out' },
+  debt_repaid_out: { label:'Ödenen Borç',        icon:'⇣', color:'#f0a500', bg:'rgba(240,165,0,.12)',   side:'out' },
+  income:          { label:'Gelir',              icon:'↑', color:'#4ade9a', bg:'rgba(74,222,154,.12)',  side:'in'  },
+  debt_received:   { label:'Alınan Borç',        icon:'⇡', color:'#60b4ff', bg:'rgba(96,180,255,.12)',  side:'in'  },
+  debt_repaid_in:  { label:'Gelen Borç Ödemesi', icon:'⇡', color:'#60b4ff', bg:'rgba(96,180,255,.12)',  side:'in'  },
+};
+const OUT_KINDS  = ['expense','debt_given','debt_repaid_out'];
+const IN_KINDS   = ['income','debt_received','debt_repaid_in'];
+const DEBT_KINDS = ['debt_given','debt_received','debt_repaid_in','debt_repaid_out'];
+const PM = [{v:'card',l:'💳 Kart'},{v:'cash',l:'💵 Nakit'},{v:'transfer',l:'🏦 Transfer'}];
+
+const FIXED_ITEMS = EXPENSE_CATS[0].items;
+
+function fmt(n){ return 'CHF ' + new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n); }
+function fmtDate(s){ return new Date(s).toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'}); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+function loadTx(){ try{ return JSON.parse(localStorage.getItem('fin_v2')||'[]'); }catch{ return []; } }
+function saveTx(arr){ localStorage.setItem('fin_v2', JSON.stringify(arr)); }
+
+let finState = {
+  filter: 'all',
+  form: null,
+  showForm: false,
+};
+
+function emptyForm(){
+  return { side:'out', kind:'expense', amount:'', category:'', pm:'card', person:'', desc:'', date:today() };
+}
+
+function renderFinans(container) {
+  finState.form = emptyForm();
+  finState.showForm = false;
+  finState.filter = 'all';
+  drawFinans(container);
+}
+
+function drawFinans(container) {
+  const tx = loadTx();
+  const totals = tx.reduce((a,t)=>{
+    const kd = KIND_DEFS[t.kind]; if(!kd) return a;
+    if(kd.side==='in') a.in+=t.amount; else a.out+=t.amount;
+    if(t.kind==='debt_given')      a.dOut+=t.amount;
+    if(t.kind==='debt_repaid_in')  a.dOut-=t.amount;
+    if(t.kind==='debt_received')   a.dIn+=t.amount;
+    if(t.kind==='debt_repaid_out') a.dIn-=t.amount;
+    return a;
+  },{in:0,out:0,dOut:0,dIn:0});
+  const balance = totals.in - totals.out;
+  const f = finState.filter;
+
+  const filtered = tx
+    .filter(t => f==='all'||( f==='in'&&IN_KINDS.includes(t.kind))||(f==='out'&&OUT_KINDS.includes(t.kind))||(f==='debt'&&DEBT_KINDS.includes(t.kind)))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const pct = totals.in>0 ? Math.min((totals.out/totals.in)*100,100) : 0;
+
+  container.innerHTML = `
+  <div class="fin-wrap">
+    <p style="font-size:10px;color:#444;letter-spacing:3px;text-transform:uppercase;font-family:Syne,sans-serif;margin-bottom:4px">Net Bakiye</p>
+    <h1 style="font-family:Syne,sans-serif;font-weight:800;font-size:34px;line-height:1;background:${balance>=0?'linear-gradient(135deg,#4ade9a,#7c6fff)':'linear-gradient(135deg,#f4715a,#ff9d7a)'};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmt(balance)}</h1>
+    <p style="font-size:10px;color:#2a2a3a;margin-top:5px;margin-bottom:18px">${balance>=0?'▲ pozitif':'▼ negatif'}</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="card" style="padding:14px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+          <span style="width:22px;height:22px;border-radius:6px;background:rgba(74,222,154,.15);color:#4ade9a;display:flex;align-items:center;justify-content:center;font-size:13px">↑</span>
+          <span style="font-size:9px;color:#444;letter-spacing:1px;text-transform:uppercase">Toplam Giriş</span>
+        </div>
+        <p style="font-size:16px;font-weight:500;color:#4ade9a;font-family:Syne,sans-serif">${fmt(totals.in)}</p>
+      </div>
+      <div class="card" style="padding:14px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+          <span style="width:22px;height:22px;border-radius:6px;background:rgba(244,113,90,.15);color:#f4715a;display:flex;align-items:center;justify-content:center;font-size:13px">↓</span>
+          <span style="font-size:9px;color:#444;letter-spacing:1px;text-transform:uppercase">Toplam Çıkış</span>
+        </div>
+        <p style="font-size:16px;font-weight:500;color:#f4715a;font-family:Syne,sans-serif">${fmt(totals.out)}</p>
+      </div>
+    </div>
+
+    ${(totals.dOut>0||totals.dIn>0)?`
+    <div class="card" style="padding:12px 14px;margin-bottom:8px;display:flex;gap:12px">
+      ${totals.dOut>0?`<div style="flex:1"><p style="font-size:9px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Alacağım</p><p style="font-size:15px;color:#f0a500;font-family:Syne,sans-serif;font-weight:500">${fmt(totals.dOut)}</p></div>`:''}
+      ${totals.dIn>0?`<div style="flex:1"><p style="font-size:9px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Borcum</p><p style="font-size:15px;color:#60b4ff;font-family:Syne,sans-serif;font-weight:500">${fmt(totals.dIn)}</p></div>`:''}
+    </div>`:''}
+
+    ${totals.in>0?`
+    <div class="card" style="padding:12px 14px;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;font-size:10px;color:#444">
+        <span>Harcama oranı</span><span>${Math.round(pct)}%</span>
+      </div>
+      <div style="height:5px;background:#1a1a28;border-radius:3px;overflow:hidden">
+        <div class="bar-fill" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#4ade9a,#f4715a);width:${pct}%"></div>
+      </div>
+    </div>`:''}
+
+    <div class="fbar">
+      ${[{k:'all',l:'Tümü'},{k:'in',l:'Girişler'},{k:'out',l:'Çıkışlar'},{k:'debt',l:'Borçlar'}].map(x=>
+        `<button class="flt${f===x.k?' a-'+x.k:''}" onclick="finFilter('${x.k}')">${x.l}</button>`
+      ).join('')}
+    </div>
+
+    ${filtered.length===0?`
+    <div class="empty-state">
+      <div style="font-size:42px;margin-bottom:12px;opacity:.15">◎</div>
+      <p style="font-size:12px">İşlem yok — + ile ekle</p>
+    </div>`:`
+    <div style="display:flex;flex-direction:column;gap:7px">
+      ${filtered.map(t=>{
+        const d=KIND_DEFS[t.kind]||KIND_DEFS.expense;
+        const pm=PM.find(p=>p.v===t.pm||p.v===t.paymentMethod);
+        const fixed=t.kind==='expense'&&FIXED_ITEMS.includes(t.category);
+        return `<div class="tx-item card" style="padding:13px 14px;display:flex;align-items:center;gap:11px">
+          <div style="width:34px;height:34px;border-radius:9px;flex-shrink:0;background:${d.bg};color:${d.color};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">${d.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px">
+              <span style="font-size:12px;font-weight:500;color:#c8c4b9">${t.person||t.category||'—'}</span>
+              <span class="tag" style="color:${d.color};background:${d.bg}">${d.label}</span>
+              ${fixed?'<span class="tag" style="color:#f0a500;background:rgba(240,165,0,.1)">SABİT</span>':''}
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+              <span style="font-size:10px;color:#444">${fmtDate(t.date)}</span>
+              ${pm?`<span style="font-size:10px;color:#555">${pm.l}</span>`:''}
+              ${t.description||t.desc?`<span style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px">· ${t.description||t.desc}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span style="font-size:13px;font-weight:500;font-family:Syne,sans-serif;color:${d.color}">${d.side==='out'?'−':'+'}${fmt(t.amount)}</span>
+            <button class="del-btn btn" onclick="finDelete(${t.id})" style="width:24px;height:24px;border-radius:6px;background:rgba(244,113,90,.1);color:#f4715a;font-size:11px;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`}
+  </div>`;
+
+  // FAB
+  let fab = document.getElementById('global-fab');
+  if(!fab){
+    fab = document.createElement('button');
+    fab.id = 'global-fab';
+    fab.className = 'fab';
+    fab.textContent = '+';
+    fab.onclick = () => showFinForm();
+    document.body.appendChild(fab);
+  }
+
+  // Form overlay
+  if(finState.showForm) renderFinForm();
+}
+
+function finFilter(f){
+  finState.filter = f;
+  drawFinans(document.getElementById('app-content'));
+}
+
+function finDelete(id){
+  const tx = loadTx().filter(t=>t.id!==id);
+  saveTx(tx);
+  drawFinans(document.getElementById('app-content'));
+}
+
+function showFinForm(){
+  finState.form = emptyForm();
+  finState.showForm = true;
+  renderFinForm();
+}
+
+function hideFinForm(){
+  finState.showForm = false;
+  const ov = document.getElementById('fin-overlay');
+  if(ov) ov.remove();
+}
+
+function finFormSet(k,v){
+  finState.form[k]=v;
+  renderFinForm();
+}
+
+function finSetSide(side){
+  finState.form.side = side;
+  finState.form.kind = side==='out'?'expense':'income';
+  finState.form.category='';
+  finState.form.person='';
+  renderFinForm();
+}
+
+function finSave(){
+  const frm = finState.form;
+  const isDebt = DEBT_KINDS.includes(frm.kind);
+  if(!frm.amount||isNaN(frm.amount)) return;
+  if(isDebt&&!frm.person) return;
+  if(!isDebt&&!frm.category) return;
+  const tx = loadTx();
+  tx.unshift({ id:Date.now(), kind:frm.kind, amount:parseFloat(frm.amount), category:frm.category, paymentMethod:frm.pm, person:frm.person, description:frm.desc, date:frm.date });
+  saveTx(tx);
+  hideFinForm();
+  drawFinans(document.getElementById('app-content'));
+}
+
+function renderFinForm(){
+  let ov = document.getElementById('fin-overlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'fin-overlay';
+    ov.className = 'overlay';
+    ov.onclick = e=>{ if(e.target===ov) hideFinForm(); };
+    document.body.appendChild(ov);
+  }
+
+  const frm = finState.form;
+  const isDebt = DEBT_KINDS.includes(frm.kind);
+  const kd = KIND_DEFS[frm.kind];
+  const catGroups = frm.side==='out'?EXPENSE_CATS:INCOME_CATS;
+  const kindsMeta = frm.side==='out'
+    ? [{k:'expense',l:'Harcama'},{k:'debt_given',l:'Verilen Borç'},{k:'debt_repaid_out',l:'Ödenen Borç (aldığımı geri verdim)'}]
+    : [{k:'income',l:'Gelir'},{k:'debt_received',l:'Alınan Borç'},{k:'debt_repaid_in',l:'Gelen Borç Ödemesi (verdiğim geri geldi)'}];
+  const ready = frm.amount&&!isNaN(frm.amount)&&(isDebt?frm.person:frm.category);
+
+  ov.innerHTML = `<div class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="font-family:Syne,sans-serif;font-weight:700;font-size:17px">Yeni İşlem</h2>
+      <button class="btn" onclick="hideFinForm()" style="width:28px;height:28px;border-radius:7px;background:#1a1a28;color:#777;font-size:13px">✕</button>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Para Yönü</span>
+      <div style="display:flex;gap:6px">
+        ${[{v:'out',l:'↓ Çıkış'},{v:'in',l:'↑ Giriş'}].map(s=>`
+          <button class="seg" onclick="finSetSide('${s.v}')"
+            style="${frm.side===s.v?(s.v==='out'?'background:rgba(244,113,90,.12);color:#f4715a;border-color:rgba(244,113,90,.3)':'background:rgba(74,222,154,.12);color:#4ade9a;border-color:rgba(74,222,154,.3)'):''}">
+            ${s.l}
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">İşlem Türü</span>
+      ${kindsMeta.map(km=>{
+        const kd2=KIND_DEFS[km.k];
+        const a=frm.kind===km.k;
+        return `<button class="kind-btn" onclick="finFormSet('kind','${km.k}')"
+          style="${a?`background:${kd2.bg};color:${kd2.color};border-color:${kd2.color}55`:''}">
+          <span style="margin-right:8px">${kd2.icon}</span>${km.l}
+        </button>`;
+      }).join('')}
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Tutar (CHF)</span>
+      <input id="fin-amount" type="number" inputmode="decimal" placeholder="0.00" value="${frm.amount}"
+        oninput="finState.form.amount=this.value"
+        style="font-size:22px;font-family:Syne,sans-serif;font-weight:700"/>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Ödeme Yöntemi</span>
+      <div style="display:flex;gap:6px">
+        ${PM.map(pm=>`
+          <button class="pm-btn" onclick="finFormSet('pm','${pm.v}')"
+            style="${frm.pm===pm.v?'background:rgba(180,160,255,.12);color:#b4a0ff;border-color:rgba(180,160,255,.35)':''}">
+            ${pm.l}
+          </button>`).join('')}
+      </div>
+    </div>
+
+    ${isDebt?`
+    <div class="sec">
+      <span class="lbl">${['debt_given','debt_repaid_in'].includes(frm.kind)?'Alacaklı Kişi / Kurum':'Borçlu Kişi / Kurum'}</span>
+      <input type="text" placeholder="Ad Soyad veya kurum adı..." value="${frm.person}"
+        oninput="finState.form.person=this.value"/>
+    </div>`:`
+    <div class="sec">
+      <span class="lbl">Kategori</span>
+      ${catGroups.map(grp=>`
+        <div style="margin-bottom:9px">
+          <p style="font-size:9px;color:#2e2e3e;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">${grp.group}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            ${grp.items.map(c=>`
+              <button class="cat-chip${frm.category===c?' sel':''}" onclick="finFormSet('category','${c.replace(/'/g,"\\'")}')">
+                ${c}
+              </button>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`}
+
+    <div class="sec">
+      <span class="lbl">${frm.side==='in'?'Ne zaman geldi?':'Tarih'}</span>
+      <input type="date" value="${frm.date}" oninput="finState.form.date=this.value"/>
+    </div>
+
+    <div class="sec" style="margin-bottom:20px">
+      <span class="lbl">${isDebt?'Not (opsiyonel)':frm.side==='out'?'Harcama Nedeni (opsiyonel)':'Açıklama (opsiyonel)'}</span>
+      <input type="text"
+        placeholder="${isDebt?'Neden için borç verildi/alındı...':frm.side==='out'?'Örn: Akşam yemeği, fatura detayı...':'Örn: Ocak maaşı, proje ödemesi...'}"
+        value="${frm.desc}" oninput="finState.form.desc=this.value"/>
+    </div>
+
+    <button class="btn" onclick="finSave()" ${ready?'':''} style="width:100%;padding:14px;border-radius:12px;background:${ready?`linear-gradient(135deg,${kd.color},${kd.color}99)`:'#151520'};color:${ready?'#fff':'#333'};font-size:14px;font-weight:500;font-family:Syne,sans-serif">
+      ${kd.icon} ${kd.label} Ekle
+    </button>
+  </div>`;
+
+  // Tutar inputuna odaklan
+  setTimeout(()=>{ const a=document.getElementById('fin-amount'); if(a) a.focus(); },100);
+}
+</script>
+</body>
+</html>
